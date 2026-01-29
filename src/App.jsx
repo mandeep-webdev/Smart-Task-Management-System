@@ -3,6 +3,7 @@ import "./App.css";
 import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
 import TaskFilters from "./components/TaskFilters";
+import EditTaskModal from "./components/EditTaskModal";
 
 function App() {
   // state initialization happens only once later only existing data used
@@ -11,6 +12,7 @@ function App() {
     return storedTasks ? JSON.parse(storedTasks) : [];
   });
   const [filters, setFilters] = useState("all");
+  const [editingTask, setEditingTask] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -30,13 +32,33 @@ function App() {
       ),
     );
   };
+  const handleEditingTask = (task) => {
+    setEditingTask(task);
+  };
   const deleteTask = (id) => {
     setTasks((prev) => prev.filter((task) => task.id !== id));
+  };
+  const editTask = (newTitle) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === editingTask.id
+          ? {
+              ...task,
+              title: newTitle,
+            }
+          : task,
+      ),
+    );
+    setEditingTask(null);
   };
   const changeFilter = (filter) => {
     setFilters(filter);
   };
 
+  const handleCancelEdit = () => {
+    console.log("cancle clicked");
+    setEditingTask(null);
+  };
   const filteredTasks = tasks.filter((task) => {
     if (filters === "active") return !task.completed;
     if (filters === "completed") return task.completed;
@@ -54,7 +76,15 @@ function App() {
           tasks={filteredTasks}
           onToggle={toggleTask}
           onDelete={deleteTask}
+          onEdit={handleEditingTask}
         />
+        {editingTask && (
+          <EditTaskModal
+            editingTask={editingTask}
+            onCancle={handleCancelEdit}
+            onSave={editTask}
+          />
+        )}
       </div>
     </div>
   );

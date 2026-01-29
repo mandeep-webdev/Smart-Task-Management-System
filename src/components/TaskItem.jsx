@@ -1,4 +1,4 @@
-function TaskItem({ task, onToggle, onDelete }) {
+function TaskItem({ task, onToggle, onDelete, onEdit }) {
   return (
     <div className="grid grid-cols-12 gap-4 px-3 py-3 items-center border-b border-b-gray-200">
       {/* Task name */}
@@ -34,7 +34,13 @@ function TaskItem({ task, onToggle, onDelete }) {
       </div>
 
       {/* Actions */}
-      <div className="col-span-3 text-right">
+      <div className="col-span-3 flex justify-end gap-3">
+        <button
+          className="text-blue-500 hover:text-blue-700 text-sm"
+          onClick={() => onEdit(task)}
+        >
+          Edit
+        </button>
         <button
           onClick={() => onDelete(task.id)}
           className="text-red-500 hover:text-red-700 text-sm"
