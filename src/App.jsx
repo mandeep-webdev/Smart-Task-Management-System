@@ -4,6 +4,9 @@ import TaskInput from "./components/TaskInput";
 import TaskList from "./components/TaskList";
 import TaskFilters from "./components/TaskFilters";
 import EditTaskModal from "./components/EditTaskModal";
+import MainLayout from "./components/MainLayout";
+import Dashboard from "./components/Dashboard";
+import Toast from "./components/Toast";
 
 function App() {
   // state initialization happens only once later only existing data used
@@ -12,11 +15,21 @@ function App() {
     return storedTasks ? JSON.parse(storedTasks) : [];
   });
   const [filters, setFilters] = useState("all");
+  const [toast, setToast] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
+  const [activePage, setActivePage] = useState("tasks");
 
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
+
+  const showToast = (msg, type) => {
+    setToast({ msg, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };
+
   const addTask = (title) => {
     const newTask = {
       id: Math.random(),
@@ -24,6 +37,7 @@ function App() {
       completed: false,
     };
     setTasks((prev) => [...prev, newTask]);
+    showToast("Task added successfully", "success");
   };
   const toggleTask = (id) => {
     setTasks((prev) =>
@@ -37,6 +51,7 @@ function App() {
   };
   const deleteTask = (id) => {
     setTasks((prev) => prev.filter((task) => task.id !== id));
+    showToast("Task deleted successfully", "success");
   };
   const editTask = (newTitle) => {
     setTasks((prev) =>
@@ -50,6 +65,7 @@ function App() {
       ),
     );
     setEditingTask(null);
+    showToast("Task edit successfully", "success");
   };
   const changeFilter = (filter) => {
     setFilters(filter);
@@ -65,28 +81,34 @@ function App() {
     return true;
   });
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center py-10 px-4">
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold text-blue-500 mb-6 text-center">
-          Smart Task Manager
-        </h1>
-        <TaskInput onAdd={addTask} />
-        <TaskFilters filters={filters} onChangeFilter={changeFilter} />
-        <TaskList
-          tasks={filteredTasks}
-          onToggle={toggleTask}
-          onDelete={deleteTask}
-          onEdit={handleEditingTask}
-        />
-        {editingTask && (
-          <EditTaskModal
-            editingTask={editingTask}
-            onCancle={handleCancelEdit}
-            onSave={editTask}
+    <MainLayout activePage={activePage} onChangePage={setActivePage}>
+      {toast && <Toast toast={toast} />}
+      {activePage === "dashboard" && <Dashboard tasks={tasks} />}
+      {activePage === "tasks" && (
+        <div className="bg-white p-7 w-full h-full">
+          <TaskInput onAdd={addTask} />
+
+          <div className="mt-4">
+            <TaskFilters filters={filters} onChangeFilter={changeFilter} />
+          </div>
+
+          <TaskList
+            tasks={filteredTasks}
+            onToggle={toggleTask}
+            onDelete={deleteTask}
+            onEdit={handleEditingTask}
           />
-        )}
-      </div>
-    </div>
+
+          {editingTask && (
+            <EditTaskModal
+              editingTask={editingTask}
+              onCancle={handleCancelEdit}
+              onSave={editTask}
+            />
+          )}
+        </div>
+      )}
+    </MainLayout>
   );
 }
 
