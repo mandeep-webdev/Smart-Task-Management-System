@@ -7,6 +7,7 @@ import EditTaskModal from "./components/EditTaskModal";
 import MainLayout from "./components/MainLayout";
 import Dashboard from "./components/Dashboard";
 import Toast from "./components/Toast";
+import TaskSearch from "./components/TaskSearch";
 
 function App() {
   // state initialization happens only once later only existing data used
@@ -18,11 +19,15 @@ function App() {
   const [toast, setToast] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
   const [activePage, setActivePage] = useState("tasks");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
   const showToast = (msg, type) => {
     setToast({ msg, type });
     setTimeout(() => {
@@ -65,7 +70,7 @@ function App() {
       ),
     );
     setEditingTask(null);
-    showToast("Task edit successfully", "success");
+    showToast("Task updated successfully", "success");
   };
   const changeFilter = (filter) => {
     setFilters(filter);
@@ -75,17 +80,24 @@ function App() {
     console.log("cancle clicked");
     setEditingTask(null);
   };
-  const filteredTasks = tasks.filter((task) => {
-    if (filters === "active") return !task.completed;
-    if (filters === "completed") return task.completed;
-    return true;
-  });
+
+  const filteredTasks = tasks
+    .filter((task) => {
+      if (filters === "active") return !task.completed;
+      if (filters === "completed") return task.completed;
+      return true;
+    })
+    .filter((task) =>
+      task.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
   return (
     <MainLayout activePage={activePage} onChangePage={setActivePage}>
       {toast && <Toast toast={toast} />}
       {activePage === "dashboard" && <Dashboard tasks={tasks} />}
       {activePage === "tasks" && (
         <div className="bg-white p-7 w-full h-full">
+          <h2 className="text-blue-600 mb-4 text-2xl font-bold">My Tasks</h2>
+          <TaskSearch searchQuery={searchQuery} onSearch={handleSearch} />
           <TaskInput onAdd={addTask} />
 
           <div className="mt-4">
@@ -97,6 +109,8 @@ function App() {
             onToggle={toggleTask}
             onDelete={deleteTask}
             onEdit={handleEditingTask}
+            searchQuery={searchQuery}
+            filters={filters}
           />
 
           {editingTask && (
