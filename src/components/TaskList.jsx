@@ -23,9 +23,10 @@ const TaskList = ({
 
   return (
     <div className="mt-4">
-      <div className="grid grid-cols-12 gap-4 px-3 py-2 text-sm font-semibold text-gray-500 border-b border-b-gray-200">
-        <div className="col-span-6">Task</div>
+      <div className="grid grid-cols-17 gap-4 px-3 py-2 text-sm font-semibold text-gray-500 border-b border-b-gray-200">
+        <div className="col-span-7">Task</div>
         <div className="col-span-3">Status</div>
+        <div className="col-span-4">Priority</div>
         <div className="col-span-3 text-right">Actions</div>
       </div>
 

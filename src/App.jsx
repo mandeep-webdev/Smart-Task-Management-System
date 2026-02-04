@@ -8,6 +8,7 @@ import MainLayout from "./components/MainLayout";
 import Dashboard from "./components/Dashboard";
 import Toast from "./components/Toast";
 import TaskSearch from "./components/TaskSearch";
+import TaskSort from "./components/TaskSort";
 
 function App() {
   // state initialization happens only once later only existing data used
@@ -16,6 +17,7 @@ function App() {
     return storedTasks ? JSON.parse(storedTasks) : [];
   });
   const [filters, setFilters] = useState("all");
+  const [sortBy, setSortBy] = useState("priority");
   const [toast, setToast] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
   const [activePage, setActivePage] = useState("tasks");
@@ -40,8 +42,10 @@ function App() {
       id: Math.random(),
       title: title,
       completed: false,
+      createdAt: Date.now(),
+      priority: "medium",
     };
-    setTasks((prev) => [...prev, newTask]);
+    setTasks((prev) => [newTask, ...prev]);
     showToast("Task added successfully", "success");
   };
   const toggleTask = (id) => {
@@ -58,13 +62,15 @@ function App() {
     setTasks((prev) => prev.filter((task) => task.id !== id));
     showToast("Task deleted successfully", "success");
   };
-  const editTask = (newTitle) => {
+  const editTask = (newTitle, priority) => {
+    console.log(priority);
     setTasks((prev) =>
       prev.map((task) =>
         task.id === editingTask.id
           ? {
               ...task,
               title: newTitle,
+              priority: priority.toLowerCase(),
             }
           : task,
       ),
@@ -76,6 +82,9 @@ function App() {
     setFilters(filter);
   };
 
+  const changeSort = (sortValue) => {
+    setSortBy(sortValue);
+  };
   const handleCancelEdit = () => {
     console.log("cancle clicked");
     setEditingTask(null);
@@ -88,8 +97,31 @@ function App() {
       return true;
     })
     .filter((task) =>
-      task.title.toLowerCase().includes(searchQuery.toLowerCase()),
+      task?.title?.toLowerCase().includes(searchQuery?.toLowerCase()),
     );
+
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    if (sortBy === "newest") {
+      return b.createdAt - a.createdAt;
+    }
+
+    if (sortBy === "oldest") {
+      return a.createdAt - b.createdAt;
+    }
+
+    if (sortBy === "priority") {
+      const priorityOrder = {
+        high: 3,
+        medium: 2,
+        low: 1,
+      };
+
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    }
+
+    return 0;
+  });
+
   return (
     <MainLayout activePage={activePage} onChangePage={setActivePage}>
       {toast && <Toast toast={toast} />}
@@ -100,12 +132,13 @@ function App() {
           <TaskSearch searchQuery={searchQuery} onSearch={handleSearch} />
           <TaskInput onAdd={addTask} />
 
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <TaskFilters filters={filters} onChangeFilter={changeFilter} />
+            <TaskSort sort={sortBy} onChangeSort={changeSort} />
           </div>
 
           <TaskList
-            tasks={filteredTasks}
+            tasks={sortedTasks}
             onToggle={toggleTask}
             onDelete={deleteTask}
             onEdit={handleEditingTask}
@@ -122,6 +155,7 @@ function App() {
           )}
         </div>
       )}
+      {console.log(sortedTasks)}
     </MainLayout>
   );
 }

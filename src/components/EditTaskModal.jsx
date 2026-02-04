@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 const EditTaskModal = ({ editingTask, onSave, onCancle }) => {
   const [editTitle, setEditTitle] = useState(editingTask?.title || "");
+  const [taskPriority, setTaskPriority] = useState("");
 
   const inputRef = useRef(null);
 
@@ -17,7 +18,7 @@ const EditTaskModal = ({ editingTask, onSave, onCancle }) => {
       }
       if (e.key === "Enter") {
         if (editTitle.trim() !== "") {
-          onSave(editTitle);
+          onSave(editTitle, taskPriority);
         }
       }
     };
@@ -25,7 +26,7 @@ const EditTaskModal = ({ editingTask, onSave, onCancle }) => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onCancle, editTitle, onSave]);
+  }, [onCancle, editTitle, onSave, taskPriority]);
   if (!editingTask) return null;
 
   return ReactDOM.createPortal(
@@ -44,9 +45,15 @@ const EditTaskModal = ({ editingTask, onSave, onCancle }) => {
           onChange={(e) => setEditTitle(e.target.value)}
           className="w-full border border-gray-300 px-3 py-2 rounded mb-4 focus:outline-none "
         />
+        <label>Priority:</label>
+        <input
+          type="text"
+          value={taskPriority}
+          onChange={(e) => setTaskPriority(e.target.value)}
+        />
         <div className="flex justify-end gap-3">
           <button
-            onClick={() => onSave(editTitle)}
+            onClick={() => onSave(editTitle, taskPriority)}
             className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
           >
             Save
